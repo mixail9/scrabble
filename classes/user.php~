@@ -1,0 +1,78 @@
+class User extends eventListener
+{
+	use HitCache;
+	
+	protected $login;
+	protected $id;
+	protected $container;
+	protected $game=null;
+	
+	private function __construct(&$container, $login)
+	{
+		$this->container=$container;
+		$this->login=$login;
+		$this->container->addEvent(container::E_USER_ADD, $this, $this->login);
+		$this->setEvent(container::E_SYSTEM, 'systemEvent');
+		$this->setEvent(container::E_CHAT_MESS, 'chatMess');
+	}
+
+	protected function systemEvent()
+	{
+	}
+	
+	protected function chatMess($mess)
+	{
+		print $this->login.' received mess ('.$mess.')<br>';
+	}
+	protected function gameProgress($mess)
+	{
+		print $this->login.' received mess ('.$mess.')<br>';
+	}
+
+	
+	public function getLogin()
+	{
+		return $this->login;
+	}
+	
+	
+	public function sendChatMess($mess)
+	{
+		$this->container->addEvent(container::E_CHAT_MESS, $mess, $this->login);
+	}
+	
+	
+	public function sendGameStep($mess)
+	{
+		$this->container->addEvent(container::E_GAME_STEP.'_'.$this->game->getId(), $mess, $this->login);
+	}
+	
+	
+	
+	public function getGame()
+	{
+		return $this->game;
+	}
+	
+	
+	public function goToGame(&$game)
+	{
+		if($this->getGame())
+			return false;
+		
+		$this->game=$game;
+		$this->setEvent(container::E_GAME_PROGRESS.'_'.$game->getId(), 'gameProgress');
+		return true;
+	}
+	
+	
+	public static function auth(&$container, $login, $pass)
+	{
+		if(true)
+			return new self($container, $login);
+		else
+			return false;
+	}
+		
+}
+
